@@ -1,16 +1,70 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-	<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
 </head>
-
 <body>
-	<!-- the entire body must be written by student -->
-    <script type="text/javascript" src="./script.js">
-</script>
+    <h1>Page number <span id="page-number">1</span></h1>
+    <button id="load-prev">Previous Page</button>
+    <button id="load-next">Next Page</button>
+    <ol id="issues-list"></ol>
+  
+<script>
 
-</body>
+  // Variables to keep track of current page number and issues list
+  let currentPage = 1;
+    let issuesList = [];
 
-</html>
+    // Function to fetch issues from the GitHub API and update the UI
+    function fetchIssues(pageNumber) {
+      fetch(`https://api.github.com/repositories/1296269/issues?page=${pageNumber}&per_page=5`)
+        .then(response => response.json())
+        .then(data => {
+          issuesList = data.map(issue => issue.title); // Extract issue titles
+          displayIssues();
+          updatePageNumber(pageNumber);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+
+    // Function to display the current issues in the UI
+    function displayIssues() {
+      const issuesListElement = document.getElementById('issues-list');
+      issuesListElement.innerHTML = ''; // Clear previous issues
+
+      issuesList.forEach(issue => {
+        const li = document.createElement('li');
+        li.textContent = issue;
+        issuesListElement.appendChild(li);
+      });
+    }
+
+    // Function to update the page number heading
+    function updatePageNumber(pageNumber) {
+      const pageNumberElement = document.getElementById('page-number');
+      pageNumberElement.textContent = pageNumber;
+    }
+
+    // Event listener for "Next Page" button
+    const loadNextButton = document.getElementById('load-next');
+    loadNextButton.addEventListener('click', () => {
+      currentPage++;
+      fetchIssues(currentPage);
+    });
+
+    // Event listener for "Previous Page" button
+    const loadPrevButton = document.getElementById('load-prev');
+    loadPrevButton.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        fetchIssues(currentPage);
+      }
+    });
+
+    // Fetch initial issues on page load
+    fetchIssues(currentPage);
